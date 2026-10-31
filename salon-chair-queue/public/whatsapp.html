@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All In · WhatsApp demo</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  body { background: #E9E4DC; display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 420px; min-height: 100vh; background: #EFE7DD; display: flex; flex-direction: column; }
+  .wa-top { background: #075E54; color: #fff; padding: 12px 14px; display: flex; gap: 10px; align-items: center; }
+  .wa-top .avatar { width: 40px; height: 40px; font-size: 15px; box-shadow: none; border: 0; }
+  .wa-top small { opacity: .8; display: block; font-size: 12px; }
+  .chat { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 82%; padding: 8px 10px 6px; border-radius: 10px; font-size: 14.5px; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .in { background: #fff; align-self: flex-start; border-top-left-radius: 2px; }
+  .out { background: #DCF8C6; align-self: flex-end; border-top-right-radius: 2px; }
+  .time { font-size: 11px; color: #8A8A8A; text-align: right; margin-top: 2px; }
+  .cta { display: block; text-align: center; margin: 8px -10px -6px; padding: 10px; border-top: 1px solid #EEE; color: #0A8F7E; font-weight: 600; text-decoration: none; }
+  .day { align-self: center; background: #E1F2FB; font-size: 12px; padding: 4px 10px; border-radius: 8px; color: #555; }
+  .demo-note { text-align: center; font-size: 12px; color: #777; padding: 10px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="wa-top">
+    <div class="avatar" id="av">RS</div>
+    <div><b id="salonName">Salon</b><small>Business account</small></div>
+  </div>
+  <div class="chat">
+    <span class="day">Today</span>
+    <div class="msg out">Hi bhai, haircut ke liye abhi aa sakta hoon? Kitni der lagegi?<div class="time">10:41 ✓✓</div></div>
+    <div class="msg in">Namaste 🙏 Thanks for messaging <b id="salonName2"></b>.<br><br>See which chairs are free and how long the wait is, live. You can also book the next free chair.
+      <div class="time">10:41</div>
+      <a class="cta" href="/">💈 Check availability</a>
+    </div>
+  </div>
+  <div class="demo-note">Demo of the auto-reply a customer gets. Tap <b>Check availability</b>.</div>
+</div>
+<script src="/common.js"></script>
+<script>
+AllIn.api('/api/state').then((s) => {
+  document.getElementById('salonName').textContent = s.owner.salon;
+  document.getElementById('salonName2').textContent = s.owner.salon;
+  const av = document.getElementById('av');
+  if (s.owner.photo) av.outerHTML = `<img class="avatar" src="${s.owner.photo}" style="width:40px;height:40px;box-shadow:none;border:0" alt="">`;
+  else av.textContent = AllIn.initials(s.owner.name);
+});
+</script>
+</body>
+</html>

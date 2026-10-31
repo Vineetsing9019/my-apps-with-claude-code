@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#138808">
+<title>All In · Salon owner</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="flag-bar"></div>
+<header class="top">
+  <div class="top-row">
+    <div><div id="logo"></div><div class="tag">Salon owner panel</div></div>
+    <button class="btn ghost sm" id="logout" style="display:none">Log out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Login -->
+  <div id="login" class="card" style="max-width:380px;margin:30px auto">
+    <h3 style="margin:0">Owner login</h3>
+    <div class="tag">Demo PIN is <b>1234</b></div>
+    <form id="loginForm">
+      <label for="pin">4-digit PIN</label>
+      <input id="pin" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••" style="letter-spacing:8px;font-size:22px;text-align:center">
+      <button class="btn green block">Log in</button>
+    </form>
+  </div>
+
+  <!-- Panel -->
+  <div id="panel" style="display:none">
+    <div class="tabs">
+      <button data-tab="chairs" class="on">Chairs</button>
+      <button data-tab="bookings">Bookings <span id="bkCount"></span></button>
+      <button data-tab="profile">Profile</button>
+      <button data-tab="share">Share</button>
+    </div>
+
+    <section data-pane="chairs">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Your chairs</span>
+        <span class="stepper"><button class="btn ghost sm" onclick="setChairs(-1)">−</button><span id="chairCount"></span><button class="btn ghost sm" onclick="setChairs(1)">+</button></span>
+      </div>
+      <div class="chairs" id="chairs"></div>
+    </section>
+
+    <section data-pane="bookings" style="display:none">
+      <div class="section-title">Booking requests</div>
+      <div class="card" id="bookings"></div>
+    </section>
+
+    <section data-pane="profile" style="display:none">
+      <div class="section-title">Your profile (customers see this)</div>
+      <form class="card" id="profileForm">
+        <div class="profile">
+          <div id="photoPreview"></div>
+          <div style="flex:1">
+            <label for="photo" class="btn ghost sm" style="display:inline-flex;margin:0">📷 Change photo</label>
+            <input type="file" id="photo" accept="image/*" style="display:none">
+            <div class="tag" style="margin-top:6px">Square photos look best</div>
+          </div>
+        </div>
+        <label for="pSalon">Salon name</label><input id="pSalon" maxlength="50">
+        <div class="row">
+          <div><label for="pName">Your name</label><input id="pName" maxlength="40"></div>
+          <div><label for="pExp">Experience (years)</label><input id="pExp" type="number" min="0" max="60"></div>
+        </div>
+        <label for="pPhone">Phone / WhatsApp</label><input id="pPhone" maxlength="20">
+        <label for="pAddr">Address</label><input id="pAddr" maxlength="80">
+        <label for="pAbout">About you</label><textarea id="pAbout" rows="2" maxlength="200"></textarea>
+        <label>Services, price (₹) and time (min)</label>
+        <div id="svcs"></div>
+        <button type="button" class="btn ghost sm" style="margin-top:8px" onclick="addSvc()">+ Add service</button>
+        <button class="btn green block">Save profile</button>
+      </form>
+    </section>
+
+    <section data-pane="share" style="display:none">
+      <div class="section-title">Share with customers</div>
+      <div class="card">
+        <p style="margin-top:0">Put this link in your WhatsApp Business auto-reply or quick reply as <b>"Check availability"</b>. Customers tap it and see your chairs live.</p>
+        <input id="link" readonly onclick="this.select()">
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" onclick="navigator.clipboard.writeText(document.getElementById('link').value).then(()=>AllIn.toast('Link copied'))">Copy link</button>
+          <a class="btn green" id="waShare" target="_blank" rel="noopener">Share on WhatsApp</a>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <a class="btn ghost" href="/" target="_blank">Open customer view</a>
+          <a class="btn ghost" href="/whatsapp" target="_blank">See WhatsApp demo</a>
+        </div>
+        <div class="note">On the same Wi-Fi, open the link on your phone using this computer's address (shown in the terminal) instead of localhost.</div>
+        <button class="btn danger sm" style="margin-top:16px" onclick="resetDemo()">Reset demo data</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="/common.js"></script>
+<script>
+const { api, now, clock, esc, initials, chairSVG, toast } = AllIn;
+document.getElementById('logo').innerHTML = AllIn.logo;
+
+let PIN = '';
+try { PIN = sessionStorage.getItem('allin_pin') || ''; } catch {}
+let S = null, lastKey = '', photo = null, profileFilled = false;
+const DURATIONS = [10, 20, 30, 45, 60, 90];
+
+async function act(body) {
+  try { const r = await api('/api/action', body, PIN); S = r.state; render(); return r; }
+  catch (e) { toast(e.message); }
+}
+
+async function load() {
+  try {
+    S = await api('/api/state', null, PIN);
+    const key = JSON.stringify({ ...S, now: 0 });
+    if (key !== lastKey) { lastKey = key; render(); }
+  } catch {}
+}
+
+async function tryLogin(pin) {
+  const r = await fetch('/api/login', { headers: { 'x-pin': pin } });
+  if (!r.ok) return false;
+  PIN = pin; try { sessionStorage.setItem('allin_pin', pin); } catch {}
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('panel').style.display = '';
+  document.getElementById('logout').style.display = '';
+  await load();
+  setInterval(load, 3000);
+  return true;
+}
+document.getElementById('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  if (!(await tryLogin(document.getElementById('pin').value))) toast('Wrong PIN. Try 1234');
+};
+document.getElementById('logout').onclick = () => { try { sessionStorage.removeItem('allin_pin'); } catch {} location.reload(); };
+if (PIN) tryLogin(PIN);
+
+// Tabs
+document.querySelectorAll('.tabs button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('[data-pane]').forEach((p) => p.style.display = p.dataset.pane === b.dataset.tab ? '' : 'none');
+});
+
+function render() {
+  document.getElementById('chairCount').textContent = S.chairs.length;
+  const pending = S.chairs.reduce((n, c) => n + c.queue.length, 0);
+  document.getElementById('bkCount').textContent = pending ? `(${pending})` : '';
+
+  document.getElementById('chairs').innerHTML = S.chairs.map((c) => {
+    const st = c.busy ? 'busy' : 'free';
+    const head = c.queue[0];
+    const presets = S.owner.services.map((s, i) => `<button class="btn ghost sm" onclick="startSvc(${c.id},${i})">${esc(s.name)} · ${esc(s.min)}m</button>`).join('');
+    const body = c.busy
+      ? `<div class="timer" data-end="${c.endsAt}">${clock(c.endsAt - now())}</div>
+         <div class="svc">${esc(c.service) || 'In service'}</div>
+         <div class="presets">
+           <button class="btn ghost sm" onclick="act({type:'extend',chairId:${c.id},minutes:5})">+5 min</button>
+           <button class="btn ghost sm" onclick="act({type:'extend',chairId:${c.id},minutes:15})">+15 min</button>
+           <button class="btn ghost sm" onclick="act({type:'extend',chairId:${c.id},minutes:-5})">−5 min</button>
+         </div>
+         <button class="btn green block" onclick="act({type:'free',chairId:${c.id}})">✔ Done, chair is free</button>`
+      : `<div class="timer">${head ? 'Held' : 'Free'}</div>
+         <div class="svc">${head ? `for ${esc(head.name)} · <span data-end="${head.holdUntil}">${clock(head.holdUntil - now())}</span> to arrive` : 'Tap a service to start the timer'}</div>
+         <div class="presets">${presets}</div>
+         <div class="row" style="margin-top:10px">
+           <select id="dur${c.id}">${DURATIONS.map((d) => `<option value="${d}">${d >= 60 ? d / 60 + ' hr' + (d % 60 ? '' : '') : d + ' min'}</option>`).join('')}</select>
+           <button class="btn saffron" onclick="startCustom(${c.id})">Start timer</button>
+         </div>`;
+    const q = c.queue.length ? `<div class="queue">Waiting: ${c.queue.map((x) => `<b>${esc(x.name)}</b>`).join(', ')}</div>` : '';
+    return `<div class="card chair ${st}">
+      <div class="chair-head"><span class="chair-name">Chair ${c.id}</span><span class="status ${st}">${c.busy ? 'Busy' : head ? 'Held' : 'Free'}</span></div>
+      ${chairSVG(c.id, c.busy)}${body}${q}
+    </div>`;
+  }).join('');
+
+  // Bookings: active first, then recent history
+  const activeRows = S.chairs.flatMap((c) => c.queue.map((q) => ({ ...q, chair: c })));
+  const history = S.bookings.filter((b) => !['waiting', 'confirmed'].includes(b.status)).slice(0, 10);
+  document.getElementById('bookings').innerHTML = (activeRows.length || history.length) ? [
+    ...activeRows.map((b) => `<div class="bk">
+      <div class="grow"><b>${esc(b.name)}</b> · Chair ${b.chair.id} · #${b.pos}<br>
+        <small>${b.phone ? `<a href="tel:${esc(b.phone)}">${esc(b.phone)}</a> · ` : ''}${b.status === 'confirmed' ? '✔ Confirmed' : 'New request'}${b.holdUntil ? ` · arrives in <span data-end="${b.holdUntil}">${clock(b.holdUntil - now())}</span> or auto-cancels` : b.chair.busy && b.pos === 1 ? ` · chair frees in <span data-end="${b.chair.endsAt}">${clock(b.chair.endsAt - now())}</span>` : ''}</small></div>
+      ${b.status === 'waiting' ? `<button class="btn green sm" onclick="act({type:'confirm',id:${b.id}})">Confirm</button>` : ''}
+      <button class="btn navy sm" onclick="act({type:'arrived',id:${b.id}})">Arrived</button>
+      <button class="btn danger sm" onclick="act({type:'reject',id:${b.id}})">✕</button>
+    </div>`),
+    ...history.map((b) => `<div class="bk" style="opacity:.6"><div class="grow">${esc(b.name)} · Chair ${b.chairId}<br><small>${b.status === 'arrived' ? 'Arrived' : esc(b.reason)}</small></div></div>`),
+  ].join('') : '<div class="tag center" style="padding:20px">No bookings yet. When customers book from your link, they show up here.</div>';
+
+  if (!profileFilled) fillProfile();
+  const link = location.origin + '/';
+  document.getElementById('link').value = link;
+  document.getElementById('waShare').href = 'https://wa.me/?text=' + encodeURIComponent(`Check chair availability at ${S.owner.salon} live: ${link}`);
+}
+
+function startSvc(id, i) { const s = S.owner.services[i]; act({ type: 'start', chairId: id, minutes: s.min, service: s.name }); }
+function startCustom(id) { act({ type: 'start', chairId: id, minutes: Number(document.getElementById('dur' + id).value), service: '' }); }
+function setChairs(d) { act({ type: 'chairs', count: S.chairs.length + d }); }
+function resetDemo() { if (confirm('Reset all demo data?')) { profileFilled = false; act({ type: 'reset' }); } }
+
+// Profile
+function fillProfile() {
+  const o = S.owner;
+  photo = o.photo;
+  document.getElementById('pSalon').value = o.salon;
+  document.getElementById('pName').value = o.name;
+  document.getElementById('pExp').value = o.experience;
+  document.getElementById('pPhone').value = o.phone;
+  document.getElementById('pAddr').value = o.address;
+  document.getElementById('pAbout').value = o.about;
+  document.getElementById('svcs').innerHTML = '';
+  o.services.forEach(addSvc);
+  showPhoto();
+  profileFilled = true;
+}
+function showPhoto() {
+  document.getElementById('photoPreview').innerHTML = photo ? `<img class="avatar" src="${photo}" alt="">` : `<div class="avatar">${initials(document.getElementById('pName').value)}</div>`;
+}
+function addSvc(s = { name: '', price: '', min: 20 }) {
+  const row = document.createElement('div');
+  row.className = 'svc-row';
+  row.innerHTML = `<input placeholder="Service" value="${esc(s.name)}"><input type="number" placeholder="₹" value="${esc(s.price)}"><input type="number" placeholder="min" value="${esc(s.min)}"><button type="button" class="btn danger sm" onclick="this.parentNode.remove()">✕</button>`;
+  document.getElementById('svcs').appendChild(row);
+}
+document.getElementById('photo').onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    // Crop to a 320px square so the upload stays small
+    const c = document.createElement('canvas'); c.width = c.height = 320;
+    const s = Math.min(img.width, img.height);
+    c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 320, 320);
+    photo = c.toDataURL('image/jpeg', 0.85); showPhoto();
+  };
+  img.src = URL.createObjectURL(f);
+};
+document.getElementById('profileForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const services = [...document.querySelectorAll('.svc-row')].map((r) => {
+    const [n, p, m] = r.querySelectorAll('input');
+    return { name: n.value.trim(), price: Number(p.value) || 0, min: Number(m.value) || 10 };
+  }).filter((s) => s.name);
+  const r = await act({ type: 'profile', owner: {
+    salon: pSalon.value, name: pName.value, experience: Number(pExp.value) || 0,
+    phone: pPhone.value, address: pAddr.value, about: pAbout.value, photo, services,
+  } });
+  if (r) toast('Profile saved ✔');
+};
+
+setInterval(() => {
+  if (!S) return;
+  let expired = false;
+  document.querySelectorAll('[data-end]').forEach((el) => {
+    const left = Number(el.dataset.end) - now();
+    el.textContent = clock(left);
+    if (left <= 0) expired = true;
+  });
+  if (expired) load();
+}, 250);
+</script>
+</body>
+</html>

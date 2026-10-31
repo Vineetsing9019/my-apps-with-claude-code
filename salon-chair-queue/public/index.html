@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FF9933">
+<title>All In · Chair availability</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="flag-bar"></div>
+<header class="top">
+  <div class="top-row">
+    <div><div id="logo"></div><div class="tag">Live chair status · no more waiting</div></div>
+    <span class="pill"><span class="dot free"></span>Live</span>
+  </div>
+  <div class="summary" id="summary"></div>
+</header>
+
+<main class="wrap">
+  <div class="section-title">Chairs right now</div>
+  <div class="chairs" id="chairs"></div>
+
+  <div class="section-title">The salon</div>
+  <div class="card" id="salon"></div>
+
+  <div class="mine" id="mine"></div>
+</main>
+
+<div class="foot">Powered by <b>All In</b> · <a href="/owner">Salon owner? Log in</a></div>
+
+<div class="modal" id="modal">
+  <form class="sheet" id="bookForm">
+    <h3 id="bookTitle">Book this chair</h3>
+    <div class="tag" id="bookSub"></div>
+    <label for="bName">Your name</label>
+    <input id="bName" required maxlength="40" placeholder="e.g. Amit Patil" autocomplete="name">
+    <label for="bPhone">Mobile number</label>
+    <input id="bPhone" inputmode="tel" maxlength="15" placeholder="98xxxxxxxx" autocomplete="tel">
+    <div class="note" id="bookNote"></div>
+    <div class="row" style="margin-top:14px">
+      <button type="button" class="btn ghost" id="bookCancel">Not now</button>
+      <button class="btn green" id="bookGo">Request booking</button>
+    </div>
+  </form>
+</div>
+
+<script src="/common.js"></script>
+<script>
+const { api, now, clock, esc, initials, chairSVG, toast } = AllIn;
+document.getElementById('logo').innerHTML = AllIn.logo;
+
+let S = null, lastKey = '';
+let bookingChair = null;
+const MY = 'allin_my_bookings';
+const myIds = () => { try { return JSON.parse(localStorage.getItem(MY)) || []; } catch { return []; } };
+const setMyIds = (ids) => { try { localStorage.setItem(MY, JSON.stringify(ids)); } catch {} };
+
+async function load() {
+  try {
+    S = await api('/api/state');
+    const key = JSON.stringify({ ...S, now: 0 }) + myIds();
+    if (key !== lastKey) { lastKey = key; render(); }
+  } catch {}
+}
+
+function myActive() {
+  for (const id of myIds()) {
+    for (const c of S.chairs) {
+      const q = c.queue.find((b) => b.id === id);
+      if (q) return { chair: c, q };
+    }
+  }
+  return null;
+}
+
+function render() {
+  const free = S.chairs.filter((c) => !c.busy && !c.queue.length);
+  const busy = S.chairs.filter((c) => c.busy);
+  const mine = myActive();
+
+  // Header summary
+  const pills = S.chairs.map((c) => {
+    const st = c.busy ? 'busy' : 'free';
+    return `<span class="pill"><span class="dot ${st}"></span>Chair ${c.id}: ${c.busy ? 'Busy' : c.queue.length ? 'Held' : 'Free'}</span>`;
+  }).join('');
+  let headline;
+  if (free.length) headline = `${free.length === S.chairs.length ? 'All chairs' : free.length + ' of ' + S.chairs.length + ' chairs'} free right now. Walk in!`;
+  else {
+    const next = busy.reduce((m, c) => Math.min(m, c.endsAt), Infinity);
+    headline = isFinite(next) ? `All ${S.chairs.length} chairs busy · next free in <span data-end="${next}">${clock(next - now())}</span>` : 'All chairs are held for customers on the way';
+  }
+  document.getElementById('summary').innerHTML = `<div class="headline">${headline}</div>${pills}`;
+
+  // Chairs
+  document.getElementById('chairs').innerHTML = S.chairs.map((c) => {
+    const st = c.busy ? 'busy' : 'free';
+    const head = c.queue[0];
+    let mid, btn = '';
+    if (c.busy) {
+      const total = Math.max(1, c.endsAt - (c.startedAt || c.endsAt - 1));
+      mid = `<div class="timer" data-end="${c.endsAt}">${clock(c.endsAt - now())}</div>
+        <div class="svc">${esc(c.service) || 'In service'}</div>
+        <div class="bar"><i data-start="${c.startedAt || 0}" data-stop="${c.endsAt}" style="width:${Math.min(100, ((now() - (c.endsAt - total)) / total) * 100)}%"></i></div>`;
+    } else if (head) {
+      mid = `<div class="timer">Held</div><div class="svc">for ${esc(head.name)} · <span data-end="${head.holdUntil}">${clock(head.holdUntil - now())}</span> left to arrive</div><div class="bar"><i style="width:100%"></i></div>`;
+    } else {
+      mid = `<div class="timer">Free now</div><div class="svc">Walk in, no wait</div><div class="bar"><i style="width:0"></i></div>`;
+    }
+    const waiting = c.queue.length ? `<div class="queue">${c.queue.length} booked: ${c.queue.map((q) => `<b>${esc(q.name)}</b>`).join(', ')}</div>` : '';
+    if (!mine && c.queue.length < 3) {
+      btn = c.busy || head
+        ? `<button class="btn saffron block" onclick="openBook(${c.id})">Book after this chair</button>`
+        : `<button class="btn green block" onclick="openBook(${c.id})">Hold this chair, I'm coming</button>`;
+    }
+    return `<div class="card chair ${st}">
+      <div class="chair-head"><span class="chair-name">Chair ${c.id}</span><span class="status ${st}">${c.busy ? 'Busy' : head ? 'Held' : 'Free'}</span></div>
+      ${chairSVG(c.id, c.busy)}
+      ${mid}${waiting}${btn}
+    </div>`;
+  }).join('');
+
+  // Salon profile
+  const o = S.owner;
+  document.getElementById('salon').innerHTML = `
+    <div class="profile">
+      ${o.photo ? `<img class="avatar" src="${esc(o.photo)}" alt="">` : `<div class="avatar">${initials(o.name)}</div>`}
+      <div>
+        <h2>${esc(o.salon)}</h2>
+        <div class="sub">${esc(o.name)} · Owner &amp; barber</div>
+        <span class="badge">✂ ${esc(o.experience)} years experience</span>
+      </div>
+    </div>
+    ${o.about ? `<p class="about">${esc(o.about)}</p>` : ''}
+    <div class="sub" style="font-size:13px;color:var(--muted);margin-top:8px">📍 ${esc(o.address)} · 📞 <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></div>
+    <div class="prices">${o.services.map((s) => `<div class="price"><span>${esc(s.name)}<small>about ${esc(s.min)} min</small></span><b>₹${esc(s.price)}</b></div>`).join('')}</div>`;
+
+  renderMine(mine);
+}
+
+function renderMine(mine) {
+  const el = document.getElementById('mine');
+  // Tell the customer once if their booking ended
+  for (const id of myIds()) {
+    const b = S.bookings.find((x) => x.id === id);
+    if (b && (b.status === 'waiting' || b.status === 'confirmed')) continue;
+    if (b?.status === 'cancelled') toast(`Booking cancelled: ${b.reason}`);
+    if (b?.status === 'arrived') toast('Welcome! Enjoy your service ✂');
+    setMyIds(myIds().filter((x) => x !== id));
+  }
+  if (!mine) { el.classList.remove('show'); return; }
+  const { chair, q } = mine;
+  let text;
+  if (chair.busy && q.pos === 1) text = `You're next for <b>Chair ${chair.id}</b>. It frees in<br><b class="big" data-end="${chair.endsAt}">${clock(chair.endsAt - now())}</b>`;
+  else if (q.pos === 1) text = `<b>Chair ${chair.id} is ready for you!</b> Reach within<br><b class="big" data-end="${q.holdUntil}">${clock(q.holdUntil - now())}</b> or it cancels`;
+  else text = `You're <b>#${q.pos}</b> in line for <b>Chair ${chair.id}</b>.<br>We'll hold it 5 min for each person ahead.`;
+  const conf = q.status === 'confirmed' ? ' <span class="badge" style="background:#E6F6EC;color:#0B7A3E">✔ Salon confirmed</span>' : ' <span class="badge">Waiting for salon</span>';
+  el.innerHTML = `<div class="grow">${text}${conf}</div><button class="btn danger sm" onclick="cancelMine(${q.id})">Cancel</button>`;
+  el.classList.add('show');
+}
+
+function openBook(id) {
+  const c = S.chairs.find((x) => x.id === id);
+  bookingChair = id;
+  document.getElementById('bookTitle').textContent = `Book Chair ${id}`;
+  const graceMin = Math.round(S.grace / 60000);
+  document.getElementById('bookSub').innerHTML = c.busy
+    ? `Frees in about <b>${clock(c.endsAt - now())}</b>${c.queue.length ? ` · ${c.queue.length} ahead of you` : ''}`
+    : c.queue.length ? `${c.queue.length} ahead of you` : 'Free right now';
+  document.getElementById('bookNote').textContent = `Please reach the salon within ${graceMin} minutes of your turn. If you're late, the booking cancels automatically so the next person can sit.`;
+  try { document.getElementById('bName').value = localStorage.getItem('allin_name') || ''; document.getElementById('bPhone').value = localStorage.getItem('allin_phone') || ''; } catch {}
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('bName').focus(), 50);
+}
+const closeBook = () => document.getElementById('modal').classList.remove('open');
+document.getElementById('bookCancel').onclick = closeBook;
+document.getElementById('modal').onclick = (e) => { if (e.target.id === 'modal') closeBook(); };
+
+document.getElementById('bookForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('bName').value, phone = document.getElementById('bPhone').value;
+  try {
+    const r = await api('/api/action', { type: 'book', chairId: bookingChair, name, phone });
+    setMyIds([...myIds(), r.id]);
+    try { localStorage.setItem('allin_name', name); localStorage.setItem('allin_phone', phone); } catch {}
+    S = r.state; closeBook(); render(); toast('Booking request sent ✔');
+  } catch (err) { toast(err.message); }
+};
+
+async function cancelMine(id) {
+  if (!confirm('Cancel your booking?')) return;
+  const r = await api('/api/action', { type: 'cancel', id });
+  S = r.state; render();
+}
+
+// Countdown ticks without redrawing the chairs
+setInterval(() => {
+  if (!S) return;
+  let expired = false;
+  document.querySelectorAll('[data-end]').forEach((el) => {
+    const left = Number(el.dataset.end) - now();
+    el.textContent = clock(left);
+    if (left <= 0) expired = true;
+  });
+  document.querySelectorAll('[data-stop]').forEach((el) => {
+    const a = Number(el.dataset.start), b = Number(el.dataset.stop);
+    if (a) el.style.width = Math.min(100, ((now() - a) / (b - a)) * 100) + '%';
+  });
+  if (expired) load();
+}, 250);
+
+load();
+setInterval(load, 3000);
+</script>
+</body>
+</html>
