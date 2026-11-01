@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Antakshari Mehfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Yatra+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12061f; --bg2:#1e0b33; --panel:rgba(255,255,255,.06); --panel2:rgba(255,255,255,.1);
+  --line:rgba(255,255,255,.12); --text:#fff6e9; --muted:#c3b2d6;
+  --gold:#ffc145; --saffron:#ff8a1f; --pink:#ff4f9a; --teal:#2ee6c5; --violet:#8b5cf6;
+  --radius:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:Poppins,system-ui,sans-serif;color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #4a1466 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% 10%, #5b1a3a 0%, transparent 55%),
+    radial-gradient(800px 500px at 50% 120%, #2a0f5c 0%, transparent 60%),
+    var(--bg);
+  min-height:100vh; overflow-x:hidden;
+}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+input{font:inherit;color:var(--text)}
+.hidden{display:none!important}
+
+/* string lights */
+.lights{position:fixed;top:0;left:0;right:0;height:28px;display:flex;justify-content:space-around;pointer-events:none;z-index:1}
+.lights::before{content:"";position:absolute;left:0;right:0;top:6px;height:14px;border-bottom:1px solid rgba(255,255,255,.15);border-radius:0 0 50% 50%}
+.lights i{width:8px;height:8px;border-radius:50%;margin-top:14px;animation:twinkle 2.4s infinite ease-in-out}
+.lights i:nth-child(4n+1){background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.lights i:nth-child(4n+2){background:var(--pink);box-shadow:0 0 12px var(--pink);animation-delay:.6s}
+.lights i:nth-child(4n+3){background:var(--teal);box-shadow:0 0 12px var(--teal);animation-delay:1.2s}
+.lights i:nth-child(4n){background:var(--saffron);box-shadow:0 0 12px var(--saffron);animation-delay:1.8s}
+@keyframes twinkle{50%{opacity:.35;transform:scale(.8)}}
+
+.wrap{max-width:1180px;margin:0 auto;padding:44px 16px 32px;position:relative;z-index:2}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand .hi{font-family:"Yatra One";font-size:30px;background:linear-gradient(90deg,var(--gold),var(--saffron),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .en{font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+.mechip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-weight:500}
+.mechip .av{width:32px;height:32px;font-size:18px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;backdrop-filter:blur(12px)}
+.av{display:grid;place-items:center;border-radius:50%;background:linear-gradient(140deg,#3b1760,#25103f);border:1px solid var(--line);flex:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:999px;font-weight:600;transition:transform .15s, filter .15s, background .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(90deg,var(--gold),var(--saffron));color:#2a1200;box-shadow:0 8px 24px rgba(255,138,31,.35)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-line{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.03)}
+.btn-line:hover{background:rgba(255,255,255,.09)}
+.btn-text{color:var(--muted);padding:10px 12px}
+.btn-text:hover{color:var(--text)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none;box-shadow:none}
+.btn-sm{padding:8px 16px;font-size:14px}
+
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);outline:none;transition:border .15s}
+.field input:focus{border-color:var(--gold)}
+.hint{font-size:13px;color:var(--muted);min-height:20px;margin-top:-6px;margin-bottom:10px}
+.hint b{color:var(--gold)}
+.hint.warn{color:var(--pink)}
+
+/* JOIN */
+#screen-join{display:grid;place-items:center;min-height:calc(100vh - 120px)}
+.join{width:min(460px,100%);text-align:center}
+.join h1{font-family:"Yatra One";font-size:64px;line-height:1.1;background:linear-gradient(90deg,var(--gold),var(--saffron),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.join .sub{color:var(--muted);margin:6px 0 26px}
+.join .card{text-align:left;padding:24px}
+.avatars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px}
+.avatars button{aspect-ratio:1;font-size:24px;border-radius:14px;background:rgba(0,0,0,.2);border:1px solid var(--line);transition:transform .15s}
+.avatars button:hover{transform:translateY(-2px)}
+.avatars button.on{border-color:var(--gold);background:rgba(255,193,69,.15)}
+.join .btn-primary{width:100%;margin-top:6px;padding:15px}
+.notes{display:flex;justify-content:center;gap:18px;margin-top:22px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+
+/* LOBBY */
+.lobby{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.sectionhead h2{font-size:20px;font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);margin-right:8px}
+.search{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.2);outline:none;width:180px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.person{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid var(--line)}
+.person .av{width:46px;height:46px;font-size:24px}
+.person .who{flex:1;min-width:0}
+.person .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{font-size:12px;color:var(--muted)}
+.status.free{color:var(--teal)}
+.empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty .big{font-size:42px;margin-bottom:8px}
+.empty code{display:inline-block;margin-top:10px;padding:6px 12px;border-radius:10px;background:rgba(0,0,0,.3);color:var(--gold);user-select:all}
+.how ol{padding-left:20px;color:var(--muted);line-height:1.8;font-size:14px}
+.how ol b{color:var(--text)}
+.how h3{font-family:"Yatra One";font-weight:400;font-size:22px;color:var(--gold);margin-bottom:10px}
+
+/* insta-style profiles */
+.av{overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.ringed{padding:3px;border-radius:50%;background:conic-gradient(from 210deg,var(--gold),var(--saffron),var(--pink),var(--violet),var(--gold));flex:none;display:inline-block}
+.ringed .av{border:3px solid var(--bg2)}
+.ringed.busy{background:rgba(255,255,255,.18)}
+.tick{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#3897f0;color:#fff;font-size:9px;margin-left:4px;vertical-align:1px}
+.stories{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{display:flex;flex-direction:column;align-items:center;gap:6px;width:72px;flex:none}
+.story .av{width:62px;height:62px;font-size:28px}
+.story small{font-size:11px;color:var(--muted);max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story .on{position:relative}
+.story .on::after{content:"";position:absolute;right:4px;bottom:4px;width:13px;height:13px;border-radius:50%;background:#2ecc71;border:2px solid var(--bg2)}
+.icard{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid var(--line);cursor:pointer;transition:background .15s, transform .15s;text-align:left;width:100%}
+.icard:hover{background:rgba(255,255,255,.06);transform:translateY(-1px)}
+.icard .av{width:54px;height:54px;font-size:26px}
+.icard .who{flex:1;min-width:0}
+.icard .nm{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icard .hd{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icard .bio{font-size:12px;color:#e5d8f2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn-req{background:linear-gradient(90deg,var(--gold),var(--saffron));color:#2a1200;padding:8px 16px;font-size:13px;border-radius:10px;font-weight:600;flex:none}
+.btn-req[disabled]{background:rgba(255,255,255,.1);color:var(--muted);cursor:default}
+.icards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.profile .av{width:96px;height:96px;font-size:48px;margin:0;border:3px solid var(--bg2)}
+.profile .ringed{margin-bottom:12px}
+.profile .hd{color:var(--muted);font-size:14px;margin-bottom:16px}
+.pstats{display:flex;justify-content:space-around;margin:0 0 16px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pstats b{display:block;font-size:18px}
+.pstats span{font-size:12px;color:var(--muted)}
+.profile .bio{margin-bottom:6px}
+.profile .city{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+/* profile editor + posts */
+.join{width:min(520px,100%)}
+.photoPick{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:16px}
+.photoPick .av{width:104px;height:104px;font-size:48px;margin:0;border:3px solid var(--bg2)}
+.pickrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+.defaults{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px}
+.defaults button{aspect-ratio:1;border-radius:50%;overflow:hidden;border:2px solid transparent;background:rgba(0,0,0,.2);transition:transform .15s}
+.defaults button:hover{transform:translateY(-2px)}
+.defaults button.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,193,69,.25)}
+.defaults img{width:100%;height:100%;display:block}
+.field textarea{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);outline:none;resize:none;font:inherit;color:var(--text)}
+.field textarea:focus{border-color:var(--gold)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:18px}
+.pgrid .tile{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.25)}
+.pgrid img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+.pgrid .rm{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.7);font-size:12px}
+.pgrid .add{display:grid;place-items:center;border:1px dashed rgba(255,255,255,.3);color:var(--muted);font-size:13px;cursor:pointer;text-align:center}
+.pgrid .add:hover{color:var(--text);border-color:var(--gold)}
+.noposts{color:var(--muted);font-size:13px;padding:14px 0 18px}
+.modal{max-height:92vh;overflow:auto}
+.modal.form{text-align:left;width:min(520px,100%)}
+.lightbox img{max-width:min(92vw,720px);max-height:84vh;border-radius:16px;display:block}
+.mechip{cursor:pointer;color:var(--text)}
+.mechip:hover{background:var(--panel2)}
+
+/* ROOM */
+.room{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:20px;align-items:start}
+.stagecard{padding:22px 16px}
+.stage{position:relative;width:min(520px,100%);aspect-ratio:1;margin:0 auto}
+.stage .rug{position:absolute;inset:14%;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #3a145c 0%, #2a0d44 55%, #1b0830 100%);
+  border:2px solid rgba(255,193,69,.35);box-shadow:inset 0 0 60px rgba(0,0,0,.5),0 0 60px rgba(139,92,246,.25)}
+.stage .rug::before{content:"";position:absolute;inset:8%;border-radius:50%;border:1px dashed rgba(255,193,69,.25)}
+.center{position:absolute;inset:14%;display:grid;place-items:center;text-align:center}
+.ring{position:absolute;inset:-3px;width:calc(100% + 6px);height:calc(100% + 6px);transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:5}
+.ring .track{stroke:rgba(255,255,255,.06)}
+.ring .prog{stroke:url(#ringgrad);stroke-linecap:round;transition:stroke .3s}
+.ring.low .prog{stroke:var(--pink)}
+.letterlabel{font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+.letter{font-family:"Yatra One";font-size:clamp(64px,14vw,112px);line-height:1;color:var(--gold);text-shadow:0 0 30px rgba(255,193,69,.5)}
+.letter.pop{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.secs{font-size:14px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.eq{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:34px;margin-top:10px}
+.eq i{width:5px;height:4px;border-radius:3px;background:linear-gradient(var(--pink),var(--gold));transition:height .08s}
+.waitmsg{max-width:70%;color:var(--muted);font-size:14px}
+.waitmsg .big{font-family:"Yatra One";font-size:34px;color:var(--gold);display:block;margin-bottom:6px}
+
+.seat{position:absolute;width:96px;transform:translate(-50%,-50%);text-align:center;transition:transform .3s}
+.seat .av{width:62px;height:62px;font-size:32px;margin:0 auto 4px;position:relative;transition:box-shadow .3s,border-color .3s}
+.seat .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .meta{font-size:11px;color:var(--muted)}
+.seat .hearts{font-size:11px;letter-spacing:1px}
+.seat .badge{position:absolute;top:-6px;right:-6px;font-size:14px}
+.seat.turn{transform:translate(-50%,-50%) scale(1.12);z-index:2}
+.seat.turn .av{border:2px solid var(--gold);box-shadow:0 0 0 6px rgba(255,193,69,.15),0 0 30px rgba(255,193,69,.6);animation:breathe 1.6s infinite}
+.seat.turn .mic{position:absolute;bottom:-6px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#2a1200;font-size:13px;display:grid;place-items:center}
+.seat.out{filter:grayscale(1);opacity:.45}
+.seat.me .nm::after{content:" (you)";color:var(--muted);font-weight:400}
+@keyframes breathe{50%{box-shadow:0 0 0 12px rgba(255,193,69,.05),0 0 40px rgba(255,193,69,.8)}}
+
+.reactbar{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.reactbar button{width:44px;height:44px;border-radius:50%;font-size:20px;background:rgba(0,0,0,.25);border:1px solid var(--line);transition:transform .15s}
+.reactbar button:hover{transform:translateY(-3px) scale(1.08)}
+.floater{position:absolute;font-size:30px;pointer-events:none;animation:floatup 2s ease-out forwards;z-index:5}
+@keyframes floatup{0%{opacity:0;transform:translate(-50%,0) scale(.5)}15%{opacity:1;transform:translate(-50%,-10px) scale(1.2)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),-140px) scale(1)}}
+
+.side{display:flex;flex-direction:column;gap:16px}
+.action h3{font-size:18px;font-weight:600;margin-bottom:4px}
+.action p.lead{color:var(--muted);font-size:14px;margin-bottom:16px}
+.action .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.action .row .btn-primary{flex:1}
+.yourturn{border-color:rgba(255,193,69,.6);box-shadow:0 0 40px rgba(255,193,69,.15)}
+.yourturn h3{font-family:"Yatra One";font-weight:400;font-size:26px;color:var(--gold)}
+.chipletter{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;background:rgba(255,193,69,.18);color:var(--gold);font-weight:700}
+.micstate{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:12px}
+.micstate .led{width:10px;height:10px;border-radius:50%;background:#55476a}
+.micstate.live .led{background:var(--teal);box-shadow:0 0 10px var(--teal)}
+.micstate.live{color:var(--teal)}
+
+.trail{max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.trail .t{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.18)}
+.trail .t .av{width:34px;height:34px;font-size:18px}
+.trail .t .s{flex:1;min-width:0;font-size:14px}
+.trail .t .s b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trail .t .s small{color:var(--muted)}
+.trail .t .pts{font-weight:700;color:var(--teal);font-size:13px}
+.trail .sys{font-size:13px;color:var(--muted);text-align:center;padding:4px}
+.mini{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto}
+.mini .person{padding:10px}
+.mini .person .av{width:36px;height:36px;font-size:18px}
+
+/* MODAL / OVERLAY */
+.scrim{position:fixed;inset:0;background:rgba(8,2,16,.7);backdrop-filter:blur(6px);display:grid;place-items:center;z-index:50;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.modal{width:min(420px,100%);text-align:center;background:linear-gradient(160deg,#2c0f4a,#1a0830);border:1px solid rgba(255,193,69,.35);border-radius:24px;padding:28px 22px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:rise .3s ease}
+@keyframes rise{from{transform:translateY(20px) scale(.96);opacity:0}}
+.modal .av{width:84px;height:84px;font-size:44px;margin:0 auto 12px;border:2px solid var(--gold)}
+.modal h3{font-size:22px;margin-bottom:6px}
+.modal p{color:var(--muted);margin-bottom:20px}
+.modal .row{display:flex;gap:10px}
+.modal .row .btn{flex:1}
+.countdown{height:4px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:18px}
+.countdown i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--pink));animation:shrink linear forwards}
+@keyframes shrink{from{width:100%}to{width:0}}
+.trophy{font-size:64px;animation:pop .6s ease}
+.board{margin:16px 0 22px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.board div{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.25)}
+.board div.win{background:rgba(255,193,69,.15);border:1px solid rgba(255,193,69,.4)}
+.board span.n{flex:1}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:70;width:min(420px,calc(100% - 32px))}
+.toast{padding:12px 18px;border-radius:14px;background:#2c1446;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4);font-size:14px;animation:rise .25s}
+
+@media (max-width:900px){
+  .lobby,.room{grid-template-columns:1fr}
+  .seat{width:78px}
+  .seat .av{width:48px;height:48px;font-size:24px}
+  .brand .en{display:none}
+}
+@media (max-width:480px){
+  .join h1{font-size:48px}
+  .search{width:130px}
+  .seat .meta{display:none}
+  .stagecard{padding:14px 6px}
+}
+</style>
+</head>
+<body>
+<div class="lights" id="lights"></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="hi">अंताक्षरी</span><span class="en">Antakshari Mehfil</span></div>
+    <button class="mechip hidden" id="mechip" title="My profile"></button>
+  </header>
+
+  <!-- JOIN -->
+  <section id="screen-join">
+    <div class="join">
+      <h1>अंताक्षरी</h1>
+      <p class="sub">Sing, pass the letter, keep the mehfil going 🎶</p>
+      <div class="card">
+        <h2 style="font-size:18px;margin-bottom:16px;text-align:center">Create your profile</h2>
+        <div id="profileForm"></div>
+      </div>
+      <div class="notes"><span>🎤 Mic opens only on your turn</span><span>❤️ 3 lives each</span><span>⏱ 60s per song</span></div>
+    </div>
+  </section>
+
+  <!-- LOBBY -->
+  <section id="screen-lobby" class="hidden">
+    <div class="lobby">
+      <div class="card">
+        <div class="sectionhead">
+          <h2><span class="dot"></span>Active now <span class="status" id="onlineCount"></span></h2>
+          <input class="search" id="search" placeholder="Search singers">
+        </div>
+        <div class="stories" id="stories"></div>
+        <div class="sectionhead" style="margin-top:14px"><h2 style="font-size:16px">Suggested singers for you</h2></div>
+        <div id="people"></div>
+      </div>
+      <div class="card how">
+        <h3>How to play</h3>
+        <ol>
+          <li><b>Invite</b> a friend who is online. When they accept you're both in a room (up to 6 singers).</li>
+          <li>The host taps <b>Start</b>. Everyone gets a turn, one at a time, like carrom.</li>
+          <li>On your turn your <b>mic goes live</b> and everyone else's is muted. Sing a song that starts with the letter in the middle.</li>
+          <li>Tap <b>Done</b> and type the last word you sang. Its last letter goes to the next singer.</li>
+          <li>Pass or run out of time and you lose a ❤. Last singer standing wins!</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOM -->
+  <section id="screen-room" class="hidden">
+    <div class="room">
+      <div class="card stagecard">
+        <div class="stage" id="stage">
+          <div class="rug"></div>
+          <div class="center">
+            <svg class="ring" id="ring" viewBox="0 0 100 100">
+              <defs><linearGradient id="ringgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc145"/><stop offset="1" stop-color="#ff4f9a"/></linearGradient></defs>
+              <circle class="track" cx="50" cy="50" r="47"/>
+              <circle class="prog" id="ringProg" cx="50" cy="50" r="47" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
+            </svg>
+            <div id="centerContent"></div>
+          </div>
+          <div id="seats"></div>
+        </div>
+        <div class="reactbar" id="reactbar"></div>
+      </div>
+      <div class="side">
+        <div class="card action" id="action"></div>
+        <div class="card" id="invitePanel">
+          <div class="sectionhead"><h2 style="font-size:16px">Invite singers</h2><span class="status" id="seatCount"></span></div>
+          <div class="mini" id="inviteList"></div>
+        </div>
+        <div class="card">
+          <div class="sectionhead"><h2 style="font-size:16px">🎼 Song trail</h2></div>
+          <div class="trail" id="trail"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="modalRoot"></div>
+<div class="toasts" id="toasts"></div>
+<div id="audioRoot" class="hidden"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const REACTIONS = ['👏','🔥','🎶','😂','❤️','🙌'];
+const DEFAULT_SEEDS = ['Mehfil','Sargam','Taal','Raag','Dhun','Geet','Sur','Lehar','Jhankaar','Tarana','Ghazal','Qawwali'];
+const defaultPhoto = seed => `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffd5dc,ffdfbf,c0aede,d1d4f9,b6e3f4`;
+const MAX_POSTS = 9;
+const store = { get(k){ try{ return localStorage.getItem(k) }catch{ return null } }, set(k,v){ try{ localStorage.setItem(k,v) }catch{} } };
+
+const socket = io();
+let meId = null, users = [], room = null, prevRoom = null, clockOffset = 0;
+let openMic = false, overDismissed = false, editing = false;
+const sentTo = new Set();
+const inviteQueue = [];
+
+/* ---------- decor ---------- */
+$('#lights').innerHTML = '<i></i>'.repeat(Math.max(12, Math.floor(innerWidth / 48)));
+
+/* ---------- toasts & sounds ---------- */
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+let actx = null;
+function audioCtx(){ if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; }
+function chime(notes){
+  try{
+    const ctx = audioCtx();
+    notes.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + i * .12;
+      o.type = 'sine'; o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.15, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + .5);
+      o.start(t); o.stop(t + .55);
+    });
+  }catch{}
+}
+
+/* ---------- profile (kept on this device, sent to the server on join) ---------- */
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9._]+/g, '.').replace(/^\.+|\.+$/g, '');
+function loadProfile(){
+  try{ const p = JSON.parse(store.get('ak-profile')); if (p && p.name) return { posts: [], ...p }; }catch{}
+  return { name: '', handle: '', city: '', bio: '', photo: null, posts: [], defaultSeed: DEFAULT_SEEDS[Math.floor(Math.random() * DEFAULT_SEEDS.length)] };
+}
+function saveProfile(p){
+  try{ localStorage.setItem('ak-profile', JSON.stringify(p)); }
+  catch{ store.set('ak-profile', JSON.stringify({ ...p, posts: [] })); toast("Your photos are too big to remember on this device, they'll stay until you close the tab"); }
+}
+let profile = loadProfile();
+
+// Square-crops and shrinks a picked image so uploads stay small.
+function toDataUrl(file, size){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const s = Math.min(img.naturalWidth, img.naturalHeight), out = Math.min(size, s);
+      const c = document.createElement('canvas'); c.width = c.height = out;
+      c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, out, out);
+      URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg', .82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(); };
+    img.src = url;
+  });
+}
+
+function mountProfileForm(box, draft, submitLabel, onSubmit){
+  let handleTouched = !!draft.handle;
+  const render = () => {
+    box.innerHTML = `
+      <div class="photoPick">
+        <span class="ringed">${avHtml({ photo: draft.photo || defaultPhoto(draft.defaultSeed) })}</span>
+        <div class="pickrow">
+          <label class="btn btn-line btn-sm">📷 Upload photo<input type="file" accept="image/*" hidden data-pick="photo"></label>
+          <label class="btn btn-line btn-sm">🤳 Take a selfie<input type="file" accept="image/*" capture="user" hidden data-pick="photo"></label>
+          ${draft.photo ? '<button type="button" class="btn btn-text btn-sm" data-act="nophoto">Use an avatar instead</button>' : ''}
+        </div>
+      </div>
+      ${draft.photo ? '' : `<span class="lbl">No photo? Pick one of ours</span>
+        <div class="defaults">${DEFAULT_SEEDS.map(s => `<button type="button" data-seed="${s}" class="${s === draft.defaultSeed ? 'on' : ''}" aria-label="Avatar ${s}"><img src="${defaultPhoto(s)}" alt=""></button>`).join('')}</div>`}
+      <label class="field"><span>Name *</span><input data-f="name" maxlength="20" placeholder="e.g. Vineet" autocomplete="off" value="${esc(draft.name)}"></label>
+      <label class="field"><span>Username</span><input data-f="handle" maxlength="24" placeholder="vineet.sings" autocomplete="off" value="${esc(draft.handle)}"></label>
+      <label class="field"><span>City</span><input data-f="city" maxlength="30" placeholder="e.g. Pune" autocomplete="off" value="${esc(draft.city)}"></label>
+      <label class="field"><span>Bio</span><textarea data-f="bio" maxlength="120" rows="2" placeholder="Kishore Kumar fan, bathroom singer 🎶">${esc(draft.bio)}</textarea></label>
+      <span class="lbl">Your photos (optional, up to ${MAX_POSTS})</span>
+      <div class="pgrid">${draft.posts.map((p, i) => `<div class="tile"><img src="${p}" alt=""><button type="button" class="rm" data-rm="${i}" aria-label="Remove photo">✕</button></div>`).join('')}
+        ${draft.posts.length < MAX_POSTS ? '<label class="tile add">＋<br>Add photo<input type="file" accept="image/*" multiple hidden data-pick="post"></label>' : ''}</div>
+      <button type="button" class="btn btn-primary" data-act="submit" style="width:100%;padding:15px">${submitLabel}</button>`;
+  };
+  render();
+  box.oninput = e => {
+    const f = e.target.dataset.f; if (!f) return;
+    draft[f] = e.target.value;
+    if (f === 'handle') handleTouched = true;
+    if (f === 'name' && !handleTouched) { draft.handle = slug(e.target.value); box.querySelector('[data-f=handle]').value = draft.handle; }
+  };
+  box.onchange = async e => {
+    const kind = e.target.dataset.pick; if (!kind) return;
+    const files = [...e.target.files];
+    try{
+      if (kind === 'photo' && files[0]) draft.photo = await toDataUrl(files[0], 320);
+      else for (const f of files.slice(0, MAX_POSTS - draft.posts.length)) draft.posts.push(await toDataUrl(f, 720));
+    }catch{ toast("Couldn't read that picture, try another one"); }
+    render();
+  };
+  box.onclick = e => {
+    const seed = e.target.closest('[data-seed]');
+    if (seed) { draft.defaultSeed = seed.dataset.seed; return render(); }
+    const rm = e.target.closest('[data-rm]');
+    if (rm) { draft.posts.splice(+rm.dataset.rm, 1); return render(); }
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'nophoto') { draft.photo = null; render(); }
+    if (act === 'submit') {
+      if (!draft.name.trim()) { toast('Type your name first'); return box.querySelector('[data-f=name]').focus(); }
+      onSubmit(draft);
+    }
+  };
+  box.onkeydown = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') box.querySelector('[data-act=submit]').click(); };
+}
+
+mountProfileForm($('#profileForm'), { ...profile, posts: [...profile.posts] }, profile.name ? 'Enter the mehfil →' : 'Create profile & enter →', d => {
+  profile = d; saveProfile(profile); audioCtx();
+  socket.emit('join', profile);
+});
+
+function openEditProfile(){
+  editing = true; openProfileId = null;
+  $('#modalRoot').innerHTML = `<div class="scrim"><div class="modal form">
+    <div class="sectionhead"><h2 style="font-size:18px">Edit profile</h2><button class="btn btn-text btn-sm" id="editClose">Cancel</button></div>
+    <div id="editForm"></div></div></div>`;
+  mountProfileForm($('#editForm'), { ...profile, posts: [...profile.posts] }, 'Save profile', d => {
+    profile = d; saveProfile(profile);
+    socket.emit('profile:update', profile);
+  });
+  $('#editClose').onclick = closeEdit;
+}
+function closeEdit(){ editing = false; $('#modalRoot').innerHTML = ''; }
+socket.on('profile:saved', ({ handle }) => { profile.handle = handle; saveProfile(profile); closeEdit(); toast('Profile saved ✓'); });
+
+function renderMeChip(){
+  const u = users.find(x => x.id === meId); if (!u) return;
+  $('#mechip').classList.remove('hidden');
+  $('#mechip').innerHTML = `${avHtml(u)}<span>${esc(u.name)}</span>`;
+}
+$('#mechip').onclick = () => renderProfile(meId);
+
+socket.on('me', ({ id, handle }) => {
+  meId = id;
+  if (handle && handle !== profile.handle) { profile.handle = handle; saveProfile(profile); }
+  show(); renderMeChip();
+});
+socket.on('connect', () => { if (meId) socket.emit('join', profile); });
+socket.on('toast', toast);
+socket.on('users', list => { users = list; renderMeChip(); renderPeople(); if (room) renderInvites(); });
+
+function show(){
+  $('#screen-join').classList.toggle('hidden', !!meId);
+  $('#screen-lobby').classList.toggle('hidden', !meId || !!room);
+  $('#screen-room').classList.toggle('hidden', !room);
+}
+
+/* ---------- lobby ---------- */
+const statusText = s => s === 'free' ? 'Free to sing' : s === 'playing' ? 'Singing in a game' : 'In a room';
+const userById = id => users.find(u => u.id === id) || room?.players.find(p => p.id === id);
+function avHtml(u, style = ''){
+  const fallback = esc(u?.avatar || '🎤');
+  const inner = u?.photo ? `<img src="${esc(u.photo)}" alt="" loading="lazy" onerror="this.replaceWith('${fallback}')">` : fallback;
+  return `<span class="av" ${style ? `style="${style}"` : ''}>${inner}</span>`;
+}
+const vTick = u => u.verified ? '<span class="tick">✓</span>' : '';
+function reqBtn(u){
+  const waiting = sentTo.has(u.id);
+  const label = waiting ? 'Requested' : u.status === 'free' ? 'Request' : u.status === 'playing' ? 'In a game' : 'In a room';
+  return `<button class="btn-req" data-invite="${u.id}" ${u.status !== 'free' || waiting ? 'disabled' : ''}>${label}</button>`;
+}
+function personRow(u){
+  return `<div class="icard" data-profile="${u.id}"><span class="ringed ${u.status !== 'free' ? 'busy' : ''}">${avHtml(u)}</span>
+    <div class="who"><div class="nm">${esc(u.name)}${vTick(u)}</div><div class="hd">@${esc(u.handle)}${u.city ? ' · ' + esc(u.city) : ''}</div><div class="bio">${esc(u.bio)}</div></div>${reqBtn(u)}</div>`;
+}
+function renderPeople(){
+  const q = $('#search').value.trim().toLowerCase();
+  const others = users.filter(u => u.id !== meId);
+  $('#onlineCount').textContent = others.length ? `· ${others.length}` : '';
+  const list = others.filter(u => (u.name + ' ' + u.handle).toLowerCase().includes(q))
+    .sort((a, b) => (a.status === 'free' ? 0 : 1) - (b.status === 'free' ? 0 : 1) || (a.bot ? 1 : 0) - (b.bot ? 1 : 0));
+  $('#stories').innerHTML = others.filter(u => u.status === 'free').map(u =>
+    `<button class="story" data-profile="${u.id}"><span class="ringed on">${avHtml(u)}</span><small>${esc(u.handle)}</small></button>`).join('');
+  $('#people').innerHTML = !others.length ? `<div class="empty"><div class="big">🎙️</div>No one else is online yet.</div>`
+    : !list.length ? `<div class="empty">No singer matches “${esc(q)}”</div>`
+    : `<div class="icards">${list.map(personRow).join('')}</div>`;
+  if (openProfileId) renderProfile(openProfileId);
+}
+$('#search').oninput = renderPeople;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-invite]');
+  if (b) { e.stopPropagation(); if (!b.disabled) socket.emit('invite', { to: b.dataset.invite }); return; }
+  const p = e.target.closest('[data-profile]');
+  if (p) renderProfile(p.dataset.profile);
+});
+
+let openProfileId = null;
+function renderProfile(id){
+  const u = users.find(x => x.id === id);
+  if (!u || inviteQueue.length || editing) { openProfileId = null; return; }
+  openProfileId = id;
+  const isMe = id === meId;
+  $('#modalRoot').innerHTML = `<div class="scrim" id="profScrim"><div class="modal profile">
+    <span class="ringed ${u.status !== 'free' ? 'busy' : ''}">${avHtml(u)}</span>
+    <h3>${esc(u.name)}${vTick(u)}</h3>
+    <div class="hd">@${esc(u.handle)}</div>
+    <div class="pstats"><div><b>${u.sung}</b><span>songs</span></div><div><b>${u.wins}</b><span>wins</span></div><div><b>${esc(u.followers)}</b><span>followers</span></div></div>
+    <p class="bio">${esc(u.bio)}</p>
+    <div class="city">${u.city ? '📍 ' + esc(u.city) + ' · ' : ''}${statusText(u.status)}</div>
+    ${u.posts?.length ? `<div class="pgrid">${u.posts.map(p => `<div class="tile"><img src="${esc(p)}" alt="" data-zoom="${esc(p)}"></div>`).join('')}</div>`
+      : `<div class="noposts">${isMe ? 'Add photos so friends can see you 📸' : 'No photos yet'}</div>`}
+    <div class="row"><button class="btn btn-line" id="profClose">Close</button>
+      ${isMe ? '<button class="btn btn-primary" id="profEdit">Edit profile</button>'
+        : `<button class="btn btn-primary" data-invite="${u.id}" ${u.status !== 'free' || sentTo.has(u.id) ? 'disabled' : ''}>${sentTo.has(u.id) ? 'Requested' : 'Send request'}</button>`}</div>
+  </div></div>`;
+  const close = () => { openProfileId = null; $('#modalRoot').innerHTML = ''; };
+  $('#profClose').onclick = close;
+  $('#profEdit')?.addEventListener('click', openEditProfile);
+  $('#profScrim').onclick = e => {
+    const z = e.target.closest('[data-zoom]');
+    if (z) return zoom(z.dataset.zoom, () => renderProfile(id));
+    if (e.target.id === 'profScrim') close();
+  };
+}
+function zoom(src, back){
+  openProfileId = null;
+  $('#modalRoot').innerHTML = `<div class="scrim lightbox" id="zoomScrim"><img src="${esc(src)}" alt=""></div>`;
+  $('#zoomScrim').onclick = back;
+}
+socket.on('invite:sent', ({ toId }) => { sentTo.add(toId); renderPeople(); if (room) renderInvites(); });
+socket.on('invite:gone', ({ fromId, toId }) => {
+  sentTo.delete(toId);
+  const i = inviteQueue.findIndex(v => v.fromId === fromId);
+  if (fromId !== meId && i >= 0) { inviteQueue.splice(i, 1); if (i === 0) renderInviteModal(); }
+  renderPeople(); if (room) renderInvites();
+});
+
+/* ---------- incoming invites ---------- */
+socket.on('invite', inv => {
+  inviteQueue.push(inv); chime([660, 880]); openProfileId = null; editing = false;
+  if (inviteQueue.length === 1) renderInviteModal();
+});
+function renderInviteModal(){
+  const inv = inviteQueue[0];
+  if (!inv) { if (!(room && room.state === 'over' && !overDismissed)) $('#modalRoot').innerHTML = ''; else renderOver(); return; }
+  $('#modalRoot').innerHTML = `<div class="scrim"><div class="modal">
+    ${avHtml(inv)}
+    <h3>${esc(inv.name)} wants to play!</h3>
+    <p>${inv.players > 1 ? `Join their room of ${inv.players} singers` : 'A one-on-one Antakshari'}${room ? '. You will leave your current room.' : '.'}</p>
+    <div class="row"><button class="btn btn-line" id="decline">Not now</button><button class="btn btn-primary" id="accept">Accept & sing</button></div>
+    <div class="countdown"><i style="animation-duration:${inv.ms}ms"></i></div>
+  </div></div>`;
+  const answer = accept => { inviteQueue.shift(); socket.emit('invite:respond', { fromId: inv.fromId, accept }); renderInviteModal(); };
+  $('#accept').onclick = () => { audioCtx(); answer(true); };
+  $('#decline').onclick = () => answer(false);
+}
+
+/* ---------- room ---------- */
+socket.on('room', r => {
+  prevRoom = room; room = r;
+  if (r) { clockOffset = r.now - Date.now(); openProfileId = null; }
+  if (!r) { sentTo.clear(); closeAllPeers(); show(); renderPeople(); if (!inviteQueue.length && !editing) $('#modalRoot').innerHTML = ''; return; }
+  if (!prevRoom || prevRoom.id !== r.id) { openMic = false; overDismissed = false; }
+  r.players.forEach(p => sentTo.delete(p.id));
+  if (r.state === 'playing') overDismissed = false;
+  const turnChanged = r.turnId && (!prevRoom || prevRoom.turnId !== r.turnId || prevRoom.trail.length !== r.trail.length);
+  if (turnChanged && r.turnId === meId) { chime([523, 659, 784]); navigator.vibrate?.(200); }
+  show(); renderRoom(turnChanged); syncPeers();
+});
+socket.on('peer:left', id => closePeer(id));
+
+function renderRoom(turnChanged){
+  renderSeats(); renderCenter(turnChanged); renderAction(); renderInvites(); renderTrail();
+  if (editing) return; // don't close the profile editor mid-edit
+  if (room.state === 'over' && !overDismissed && !inviteQueue.length) renderOver();
+  else if (!inviteQueue.length) $('#modalRoot').innerHTML = '';
+}
+
+function renderSeats(){
+  const n = room.players.length;
+  $('#seats').innerHTML = room.players.map((p, i) => {
+    const ang = (2 * Math.PI * i / n) - Math.PI / 2, R = 43;
+    const x = 50 + R * Math.cos(ang), y = 50 + R * Math.sin(ang);
+    const cls = ['seat', p.id === room.turnId && 'turn', p.lives <= 0 && room.state !== 'waiting' && 'out', p.id === meId && 'me'].filter(Boolean).join(' ');
+    const hearts = '❤'.repeat(Math.max(0, p.lives)) + '<span style="opacity:.25">' + '❤'.repeat(Math.max(0, 3 - p.lives)) + '</span>';
+    return `<div class="${cls}" data-seat="${p.id}" style="left:${x}%;top:${y}%">
+      <div style="position:relative;width:fit-content;margin:0 auto">${avHtml(p)}${p.id === room.hostId ? '<span class="badge">👑</span>' : ''}${p.id === room.turnId ? '<span class="mic">🎤</span>' : ''}</div>
+      <div class="nm">${esc(p.name)}</div>
+      <div class="hearts">${hearts}</div>
+      <div class="meta">${p.score} pts</div>
+    </div>`;
+  }).join('');
+}
+
+const EQ_BARS = 16;
+function renderCenter(turnChanged){
+  const singer = room.players.find(p => p.id === room.turnId);
+  if (room.state === 'playing') {
+    const html = `<div><div class="letterlabel">Sing from</div>
+      <div class="letter ${turnChanged ? 'pop' : ''}">${esc(room.letter)}</div>
+      <div class="secs" id="secs"></div>
+      <div class="eq" id="eq">${'<i></i>'.repeat(EQ_BARS)}</div>
+      <div class="secs">${singer ? (singer.id === meId ? 'You are singing' : esc(singer.name) + ' is singing') : ''}</div>
+      ${room.botSong ? `<div class="secs" style="color:var(--gold)">🎵 “${esc(room.botSong)}”</div>` : ''}</div>`;
+    if (turnChanged || !$('#eq') || $('#centerContent').dataset.song !== String(room.botSong)) $('#centerContent').innerHTML = html;
+    $('#centerContent').dataset.song = String(room.botSong);
+  } else {
+    const host = room.players.find(p => p.id === room.hostId);
+    $('#centerContent').innerHTML = room.state === 'over'
+      ? `<div class="waitmsg"><span class="big">🏆</span>${esc(room.players.find(p => p.id === room.winnerId)?.name || 'Someone')} won the last round</div>`
+      : `<div class="waitmsg"><span class="big">${room.players.length} / 6</span>${room.players.length < 2 ? 'Waiting for more singers' : room.hostId === meId ? 'Everyone is here? Tap Start' : `Waiting for ${esc(host?.name)} to start`}</div>`;
+  }
+}
+
+function renderAction(){
+  const a = $('#action'); a.classList.remove('yourturn');
+  const isHost = room.hostId === meId, mePlayer = room.players.find(p => p.id === meId);
+  if (room.state !== 'playing') {
+    a.innerHTML = `<h3>${room.state === 'over' ? 'Round over' : 'The mehfil is gathering'}</h3>
+      <p class="lead">${isHost ? 'Invite friends below, then start when everyone is in. Chat freely with the Talk button until the game begins.' : 'Chat with the Talk button while you wait for the host.'}</p>
+      <div class="row">
+        ${isHost ? `<button class="btn btn-primary" id="startBtn" ${room.players.length < 2 ? 'disabled' : ''}>${room.state === 'over' ? 'Play again' : 'Start the game'}</button>` : ''}
+        <button class="btn btn-line" id="talkBtn">${openMic ? '🔇 Stop talking' : '🎙 Talk'}</button>
+        <button class="btn btn-text" id="leaveBtn">Leave</button>
+      </div>
+      <div class="micstate" id="micstate"><span class="led"></span><span id="miclabel"></span></div>`;
+    if (isHost) $('#startBtn').onclick = () => socket.emit('room:start');
+    $('#talkBtn').onclick = async () => { openMic = !openMic; await micReady(); renderAction(); applyGate(); };
+  } else if (room.turnId === meId) {
+    a.classList.add('yourturn');
+    const kept = { song: $('#songIn')?.value || '', last: $('#lastIn')?.value || '' };
+    a.innerHTML = `<h3>Your turn! 🎤</h3>
+      <p class="lead">Sing a song starting with <span class="chipletter">${esc(room.letter)}</span>. Your mic is live, everyone else is listening.</p>
+      <label class="field"><span>Song you're singing</span><input id="songIn" maxlength="80" placeholder="${esc(room.letter)}… e.g. song title" autocomplete="off"></label>
+      <div class="hint" id="songHint"></div>
+      <label class="field"><span>Last word you sang</span><input id="lastIn" maxlength="30" placeholder="e.g. pyaar" autocomplete="off"></label>
+      <div class="hint" id="lastHint">The last letter of that word goes to the next singer.</div>
+      <div class="row">
+        <button class="btn btn-primary" id="doneBtn">Done singing ✓</button>
+        <button class="btn btn-line" id="passBtn">Pass (−1 ❤)</button>
+      </div>
+      <div class="micstate live" id="micstate"><span class="led"></span><span id="miclabel"></span></div>`;
+    $('#songIn').value = kept.song; $('#lastIn').value = kept.last;
+    const check = () => {
+      const s = $('#songIn').value.trim(), f = (s.match(/[a-z]/i) || [''])[0].toUpperCase();
+      const h = $('#songHint');
+      h.className = 'hint' + (s && f !== room.letter ? ' warn' : '');
+      h.innerHTML = !s ? '' : f === room.letter ? 'Starts with the right letter ✓' : `Has to start with <b>${esc(room.letter)}</b>`;
+      const l = ($('#lastIn').value.match(/[a-z](?=[^a-z]*$)/i) || [''])[0].toUpperCase();
+      $('#lastHint').innerHTML = l ? `Next singer gets <b>${l}</b>` : 'The last letter of that word goes to the next singer.';
+    };
+    $('#songIn').oninput = check; $('#lastIn').oninput = check; check();
+    const done = () => socket.emit('turn:done', { song: $('#songIn').value, lastWord: $('#lastIn').value });
+    $('#doneBtn').onclick = done;
+    $('#lastIn').onkeydown = e => { if (e.key === 'Enter') done(); };
+    $('#passBtn').onclick = () => socket.emit('turn:pass');
+    if (!kept.song) $('#songIn').focus();
+  } else {
+    const singer = room.players.find(p => p.id === room.turnId);
+    const out = mePlayer && mePlayer.lives <= 0;
+    a.innerHTML = `<h3>${out ? "You're out this round 💔" : `${esc(singer?.name)} is singing`}</h3>
+      <p class="lead">${out ? 'Stay and cheer, the next round is coming.'
+        : singer?.bot ? (room.botSong ? `🎵 “${esc(room.botSong)}”. Send some love, and think of a song for the letter it ends on!` : 'Hmm… they seem stuck on this letter 🤔')
+        : 'Listen in and send some love. Your turn is coming, think of a song for whatever letter they end on!'}</p>
+      <div class="row"><button class="btn btn-text" id="leaveBtn">Leave room</button></div>
+      <div class="micstate" id="micstate"><span class="led"></span><span id="miclabel"></span></div>`;
+  }
+  $('#leaveBtn')?.addEventListener('click', () => socket.emit('room:leave'));
+  updateMicUI();
+}
+
+function renderInvites(){
+  const canInvite = room.state !== 'playing' && room.players.length < 6;
+  $('#invitePanel').classList.toggle('hidden', !canInvite);
+  if (!canInvite) return;
+  $('#seatCount').textContent = `${6 - room.players.length} seats left`;
+  const free = users.filter(u => u.id !== meId && u.status === 'free' && !room.players.some(p => p.id === u.id));
+  $('#inviteList').innerHTML = free.length ? free.map(personRow).join('')
+    : `<div class="empty" style="padding:16px">No one else online. Share <code>${esc(location.href)}</code></div>`;
+}
+
+function renderTrail(){
+  const by = id => room.players.find(p => p.id === id);
+  const items = [...room.trail].reverse();
+  $('#trail').innerHTML = items.length ? items.map(t => t.system
+    ? `<div class="sys">${esc(t.text)}</div>`
+    : `<div class="t">${avHtml(by(t.by))}<div class="s"><b>${esc(t.song)}</b><small>${esc(by(t.by)?.name || 'Left')} · ${esc(t.from)} → ${esc(t.next)} (“${esc(t.lastWord)}”)</small></div><span class="pts">+${t.points}</span></div>`
+  ).join('') : `<div class="sys">Songs will appear here as you sing</div>`;
+}
+
+$('#reactbar').innerHTML = REACTIONS.map(e => `<button data-r="${e}">${e}</button>`).join('');
+$('#reactbar').onclick = e => { const b = e.target.closest('button'); if (b) socket.emit('react', { emoji: b.dataset.r }); };
+socket.on('react', ({ from, emoji }) => {
+  const seat = document.querySelector(`[data-seat="${CSS.escape(from)}"]`); if (!seat) return;
+  const f = document.createElement('span'); f.className = 'floater'; f.textContent = emoji;
+  f.style.left = seat.style.left; f.style.top = seat.style.top; f.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+  $('#stage').appendChild(f); setTimeout(() => f.remove(), 2000);
+});
+
+function renderOver(){
+  const ranked = [...room.players].sort((a, b) => b.score - a.score);
+  const winner = room.players.find(p => p.id === room.winnerId);
+  const isHost = room.hostId === meId;
+  $('#modalRoot').innerHTML = `<div class="scrim"><div class="modal">
+    <div class="trophy">🏆</div>
+    <h3>${winner?.id === meId ? 'You won the mehfil!' : `${esc(winner?.name || 'Someone')} wins!`}</h3>
+    <p>${room.trail.filter(t => !t.system).length} songs sung this round</p>
+    <div class="board">${ranked.map((p, i) => `<div class="${p.id === room.winnerId ? 'win' : ''}"><span>${i + 1}.</span>${avHtml(p, 'width:30px;height:30px;font-size:16px')}<span class="n">${esc(p.name)}</span><b>${p.score}</b></div>`).join('')}</div>
+    <div class="row">${isHost ? `<button class="btn btn-line" id="closeOver">Back to room</button><button class="btn btn-primary" id="againBtn" ${room.players.length < 2 ? 'disabled' : ''}>Play again</button>`
+      : `<button class="btn btn-primary" id="closeOver">Back to room</button>`}</div>
+  </div></div>`;
+  $('#closeOver').onclick = () => { overDismissed = true; $('#modalRoot').innerHTML = ''; };
+  $('#againBtn')?.addEventListener('click', () => socket.emit('room:start'));
+  if (!document.querySelector('.confetti')) confetti();
+}
+function confetti(){
+  const colors = ['#ffc145', '#ff4f9a', '#2ee6c5', '#8b5cf6', '#ff8a1f'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('i'); c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw'; c.style.background = colors[i % colors.length];
+    c.style.animationDuration = 2 + Math.random() * 2 + 's'; c.style.animationDelay = Math.random() * .6 + 's';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 5000);
+  }
+}
+
+/* ---------- timer + voice meter loop ---------- */
+const meters = new Map();
+function meterFor(stream){
+  if (!stream || !actx) return null;
+  if (meters.has(stream.id)) return meters.get(stream.id);
+  try{
+    const an = actx.createAnalyser(); an.fftSize = 64;
+    actx.createMediaStreamSource(stream).connect(an);
+    const m = { an, data: new Uint8Array(an.frequencyBinCount) }; meters.set(stream.id, m); return m;
+  }catch{ return null }
+}
+function tick(){
+  if (room && room.state === 'playing') {
+    const left = Math.max(0, room.turnEndsAt - (Date.now() + clockOffset));
+    const frac = left / room.turnMs;
+    $('#ringProg').style.strokeDashoffset = String(100 - frac * 100);
+    $('#ring').classList.toggle('low', left < 10000);
+    const s = $('#secs'); if (s) s.textContent = Math.ceil(left / 1000) + 's left';
+    const stream = room.turnId === meId ? localStream : peers.get(room.turnId)?.stream;
+    const m = meterFor(stream), bars = document.querySelectorAll('#eq i');
+    if (m) m.an.getByteFrequencyData(m.data);
+    const botSinging = room.botSong && room.players.find(p => p.id === room.turnId)?.bot, t = performance.now() / 1000;
+    bars.forEach((b, i) => {
+      const v = botSinging ? Math.abs(Math.sin(t * 6 + i * .7) * Math.sin(t * 2.3 + i * .3)) * .9 : m ? m.data[i + 1] / 255 : 0;
+      b.style.height = (4 + v * 30) + 'px';
+    });
+  } else {
+    const p = $('#ringProg'); if (p) p.style.strokeDashoffset = '100';
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* ---------- voices: WebRTC mesh, mic gated by turn ---------- */
+let localStream = null, micPromise = null, micDenied = false;
+const peers = new Map(); // id -> { pc, audio, stream, queue }
+function micReady(){
+  if (!micPromise) micPromise = navigator.mediaDevices?.getUserMedia
+    ? navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+        .then(s => { localStream = s; s.getAudioTracks().forEach(t => t.enabled = false); applyGate(); return s; })
+        .catch(() => { micDenied = true; toast("Mic is blocked. You can still listen and play, allow the mic to sing."); updateMicUI(); return null; })
+    : Promise.resolve(null).then(() => { micDenied = true; toast('This browser needs https or localhost for the mic'); return null; });
+  return micPromise;
+}
+function canTalk(){
+  if (!room) return false;
+  return room.state === 'playing' ? room.turnId === meId : openMic;
+}
+function applyGate(){
+  const track = localStream?.getAudioTracks()[0];
+  if (track) track.enabled = canTalk();
+  peers.forEach((p, id) => { p.audio.muted = room?.state === 'playing' ? id !== room.turnId : false; });
+  updateMicUI();
+}
+function updateMicUI(){
+  const box = $('#micstate'), label = $('#miclabel'); if (!box || !label) return;
+  const live = canTalk() && !!localStream;
+  box.classList.toggle('live', live);
+  label.textContent = micDenied ? 'Mic blocked by the browser' : live ? 'Your mic is live' : room?.state === 'playing' ? 'Your mic is muted until your turn' : 'Your mic is off';
+}
+function makePeer(id, initiator){
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  else pc.addTransceiver('audio', { direction: 'recvonly' });
+  const audio = document.createElement('audio'); audio.autoplay = true; audio.playsInline = true;
+  $('#audioRoot').appendChild(audio);
+  const p = { pc, audio, stream: null, queue: [] };
+  pc.ontrack = e => { p.stream = e.streams[0] || new MediaStream([e.track]); audio.srcObject = p.stream; audio.play().catch(() => {}); applyGate(); };
+  pc.onicecandidate = e => { if (e.candidate) socket.emit('rtc', { to: id, data: { candidate: e.candidate } }); };
+  peers.set(id, p);
+  if (initiator) pc.createOffer().then(o => pc.setLocalDescription(o)).then(() => socket.emit('rtc', { to: id, data: { sdp: pc.localDescription } }));
+  return p;
+}
+function closePeer(id){
+  const p = peers.get(id); if (!p) return;
+  p.pc.close(); p.audio.remove(); if (p.stream) meters.delete(p.stream.id); peers.delete(id);
+}
+function closeAllPeers(){ [...peers.keys()].forEach(closePeer); }
+async function syncPeers(){
+  if (!room) return;
+  await micReady();
+  if (!room) return;
+  const ids = new Set(room.players.filter(p => !p.bot).map(p => p.id));
+  [...peers.keys()].forEach(id => { if (!ids.has(id)) closePeer(id); });
+  ids.forEach(id => { if (id !== meId && !peers.has(id) && meId < id) makePeer(id, true); });
+  applyGate();
+}
+socket.on('rtc', async ({ from, data }) => {
+  await micReady();
+  const p = peers.get(from) || makePeer(from, false);
+  const pc = p.pc;
+  try{
+    if (data.sdp) {
+      await pc.setRemoteDescription(data.sdp);
+      if (data.sdp.type === 'offer') {
+        await pc.setLocalDescription(await pc.createAnswer());
+        socket.emit('rtc', { to: from, data: { sdp: pc.localDescription } });
+      }
+      for (const c of p.queue.splice(0)) await pc.addIceCandidate(c).catch(() => {});
+    } else if (data.candidate) {
+      if (pc.remoteDescription) await pc.addIceCandidate(data.candidate).catch(() => {});
+      else p.queue.push(data.candidate);
+    }
+  }catch(err){ console.warn('rtc', err); }
+});
+</script>
+</body>
+</html>
